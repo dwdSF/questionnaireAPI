@@ -15,10 +15,10 @@ pip3 install -r requirements.txt
 ```
   - Создать и предварительно заполнить базу данных
 ```shell
-python manage.py makemigrations
-python manage.py migrate
+python3 manage.py makemigrations
+python3 manage.py migrate
 ```
   - Запуск web-приложения
-```python manage.py runserver```
+```python3 manage.py runserver```
 
-## Документация к API доступна после запуска локально по адресу: http://127.0.0.1:8000/redoc/
+# Документация к API доступна после запуска локально по адресу: http://127.0.0.1:8000/redoc/
