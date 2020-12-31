@@ -1,0 +1,428 @@
+openapi: 3.0.2
+info:
+  title: 'API тестовое задание'
+  version: ''
+  description: |
+    запросы к API начинаются с `/api/v1/`
+
+    # Описание
+    Тестовое задание: спроектировать и разработать API для системы опросов пользователей.
+
+    # Алгоритм авторизации для администратора
+    1. Создать пользователя через консоль: python3 manage.py createsuperuser .
+    2. Администратор отправляет запрос с параметром `username` и `password` на `/auth/`.
+    3. Полученный access токен передаем с каждым запросом в заголовке Authorization .
+
+
+
+servers:
+  - url: /api/v1/
+
+tags:
+  - name: POLLS
+    description: Опросы
+
+
+paths:
+  /polls/:
+    get:
+      tags:
+        - POLLS
+      description: |
+        Получить все активные опросы.
+
+      responses:
+        200:
+          description: Список опросов с пагинацией
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    count:
+                      type: number
+                    next:
+                      type: string
+                    previous:
+                      type: string
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Poll'
+    post:
+      tags:
+        - POLLS
+      description: |
+        Создать новый опрос.
+
+        Права доступа: **Только администратор.**
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Poll'
+      responses:
+        200:
+          description: 'Новый опрос'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Poll'
+        401:
+          description: Необходим JWT токен
+      security:
+      - jwt_auth:
+        - write:admin
+  /polls/{poll_id}/:
+    parameters:
+      - name: poll_id
+        in: path
+        required: true
+        description: ID опроса
+        schema:
+          type: number
+    get:
+      tags:
+        - POLLS
+      description: |
+        Получить вопросы конкретного опроса.
+
+        Права доступа: **Доступно без токена.**
+      responses:
+        200:
+          description: Список вопросов с пагинацией
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    count:
+                      type: number
+                    next:
+                      type: string
+                    previous:
+                      type: string
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Question'
+        404:
+          description: Не найден опрос
+    post:
+      tags:
+        - POLLS
+      description: |
+        Добавить новый вопрос к опросу.
+
+        Права доступа: **Только администратор.**
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+      responses:
+        200:
+          description: 'Новый вопрос'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        401:
+          description: Необходим JWT токен
+      security:
+      - jwt_auth:
+        - write:admin
+    put:
+      tags:
+        - POLLS
+      description: |
+        Обновить информацию о опросе.
+
+        Права доступа: **Администратор.**
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Poll'
+      responses:
+        200:
+          description: Опрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Poll'
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+        404:
+          description: Не найден объект оценки
+      security:
+      - jwt_auth:
+        - write:admin
+    delete:
+      tags:
+        - POLLS
+      description: |
+        Удалить опрос
+
+        Права доступа: **Администратор.**
+      responses:
+        204:
+          description: ''
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+        404:
+          description: Не найден объект оценки
+      security:
+      - jwt_auth:
+        - write:admin
+
+  /polls/{poll_id}/{question_id}/:
+    parameters:
+      - name: poll_id
+        in: path
+        required: true
+        description: ID опроса
+        schema:
+          type: number
+      - name: question_id
+        in: path
+        required: true
+        description: ID вопроса
+        schema:
+          type: number
+    get:
+      tags:
+        - POLLS
+      description: |
+        Получить конкретный вопрос из опроса.
+
+        Права доступа: **Доступно без токена.**
+      responses:
+        200:
+          description: 'Конкретный вопрос'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        404:
+          description: Не найден вопрос.
+    post:
+      tags:
+        - POLLS
+      description: |
+        Отправить ответ на вопрос.
+
+        Права доступа: **Доступно без токена.**
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Answer'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+          description: ''
+        401:
+          description: Необходим JWT токен
+        404:
+          description: Не найден вопрос или опрос
+      security:
+      - jwt_auth:
+        - write:admin
+    put:
+      tags:
+        - POLLS
+      description: |
+        Обновить информацию о конкретном вопросе.
+
+        Права доступа: **Администратор.**
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+      responses:
+        200:
+          description: Вопрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+        404:
+          description: Не найден вопрос
+      security:
+      - jwt_auth:
+        - write:admin
+    delete:
+      tags:
+        - POLLS
+      description: |
+        Удалить конкретный вопрос
+
+        Права доступа: **Администратор.**
+      responses:
+        204:
+          description: ''
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+        404:
+          description: Не найден вопрос
+      security:
+      - jwt_auth:
+        - write:admin
+
+  /polls/answers/{user_id}/:
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        description: ID пользователя
+        schema:
+          type: number
+      - name: search
+        in: query
+        description: поиск по id опроса по ответам пользователя.
+        schema:
+          type: number
+    get:
+      tags:
+        - POLLS
+      description: |
+        Получить ответы пользователя по его id.
+
+        Права доступа: **Доступно без токена.**
+      responses:
+        200:
+          description: Список ответов с пагинацией
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    count:
+                      type: number
+                    next:
+                      type: string
+                    previous:
+                      type: string
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Answer'
+        404:
+          description: Не найден пользователь.
+
+components:
+  schemas:
+    Poll:
+      title: Опросы
+      type: object
+      description: Все активные опросы
+      required:
+          - name
+          - start_date
+          - end_date
+          - description
+      properties:
+        id:
+          type: integer
+          title: ID опроса
+          readOnly: true
+        name:
+          type: string
+          title: Название опроса
+        start_date:
+          type: string
+          format: date-time
+          title: Дата начала опроса
+        end_date:
+          type: string
+          format: date-time
+          title: Дата окончания опроса
+        description:
+          type: string
+          title: Описание опроса
+
+    Question:
+      title: Вопросы
+      type: object
+      description: Все вопросы конкретного опроса
+      required:
+          - question_type
+          - text
+      properties:
+        id:
+          type: integer
+          title: ID вопроса
+          readOnly: true
+        poll:
+          type: string
+          title: Название опроса
+        question_type:
+          type: string
+          title: Тип вопроса
+        text:
+          type: string
+          title: Текст вопроса
+    Answer:
+      title: Ответы
+      type: object
+      description: Ответ на вопрос
+      required:
+          - user_id
+          - answer
+      properties:
+        poll:
+          type: integer
+          title: ID опроса
+        question:
+          type: string
+          title: Текст вопроса
+        user_id:
+          type: integer
+          title: ID пользователя
+        answer:
+          type: string
+          title: Текст ответа
+
+    ValidationError:
+      title: Ошибка валидации
+      type: object
+      properties:
+        field_name:
+          type: array
+          items:
+            type: string
+
+    Token:
+      title: Токен
+      type: object
+      properties:
+        token:
+          type: string
+          title: access токен
+
+  securitySchemes:
+    jwt_auth:
+      type: apiKey
+      name: Bearer
+      in: header
