@@ -19,6 +19,8 @@ python3 manage.py makemigrations
 python3 manage.py migrate
 ```
   - Запуск web-приложения
-```python3 manage.py runserver```
+```
+python3 manage.py runserver
+```
 
-# Документация к API доступна после запуска локально по адресу: http://127.0.0.1:8000/redoc/
+### Документация к API доступна после запуска локально по адресу: http://127.0.0.1:8000/redoc/
