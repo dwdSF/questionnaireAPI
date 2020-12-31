@@ -7,7 +7,7 @@ API для системы опросов пользователей.
   - Установить виртуальное окружение и активировать
 ```shell
 python3 -m venv env
-env\bin\activate
+source env\bin\activate
 ```
   - Установить зависимости
 ```shell
